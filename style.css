@@ -80,3 +80,5 @@ main > section#dashboardTop5{display:block}
 .match-team-points{display:flex;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #252c37;color:#9da8b8;font-size:11px}.match-team-points b{color:#ffb000;font-size:12px}
 @media(max-width:1000px){.match-team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.game-tabs{top:58px}.match-team-grid{grid-template-columns:1fr}.player-slot-big{grid-template-columns:minmax(0,1fr) 82px}}
+
+.data-manager-card{grid-column:1/-1}.data-manager-card h3{margin-top:0}.data-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.data-btn{display:inline-flex;align-items:center;gap:8px}.data-btn .svg-icon{width:18px;height:18px;display:inline-flex}.data-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.export-btn{background:#18a957;color:#fff}.import-btn{background:#2488ff;color:#fff}.backup-btn{background:#252c37;color:#fff}.restore-btn{background:#7a5cff;color:#fff}.data-btn:hover{filter:brightness(1.08)}

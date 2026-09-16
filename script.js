@@ -116,7 +116,7 @@ function escapeAttr(s){return escapeHtml(s)}
 
 function renderAll(){
   renderIdentity();renderSettings();renderTeams();renderGroups();renderSchedule();renderMatchSelect();renderMatchInput();
-  renderScoring();renderStandings();renderTop5();renderAllMatchdayStandings();renderHistory();renderPlayIn();renderGrandFinal();renderPlayerStats();routePage();
+  renderScoring();renderStandings();renderTop5();renderAllMatchdayStandings();renderHistory();renderPlayIn();renderGrandFinal();renderPlayerStats();renderBackupInfo();routePage();
 }
 function renderIdentity(){
   const n=state.settings.name||"FF CHAMPIONSHIP";
@@ -677,6 +677,69 @@ function routePage(){
   document.querySelectorAll('.main-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+route));
 }
 window.addEventListener('hashchange',routePage);
+
+const BACKUP_STORAGE=STORAGE+"_backup";
+function svgDownload(filename,content,mime="application/json"){
+  const blob=new Blob([content],{type:mime});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exportData(){
+  // Export never changes the current state.
+  const payload={format:"FF Championship Data",version:22,exportedAt:new Date().toISOString(),data:state};
+  svgDownload("ff_championship_backup.json",JSON.stringify(payload,null,2));
+}
+function backupData(){
+  // Keep a local safety copy as well as a downloadable JSON backup.
+  const snapshot=JSON.stringify(state);
+  localStorage.setItem(BACKUP_STORAGE,snapshot);
+  const payload={format:"FF Championship Backup",version:22,backedUpAt:new Date().toISOString(),data:state};
+  svgDownload("ff_championship_backup_"+new Date().toISOString().slice(0,10)+".json",JSON.stringify(payload,null,2));
+  renderBackupInfo();
+  alert("Backup berhasil dibuat. Data turnamen yang sekarang tetap dipertahankan.");
+}
+function renderBackupInfo(){
+  const el=document.getElementById("backupInfo");if(!el)return;
+  const raw=localStorage.getItem(BACKUP_STORAGE);
+  if(!raw){el.textContent="Belum ada backup lokal.";return;}
+  try{const d=JSON.parse(raw);el.textContent="Backup lokal tersedia. Backup ini dapat dipulihkan kapan saja.";}catch(e){el.textContent="Backup lokal tersedia.";}
+}
+function extractImportedData(obj){
+  if(obj&&obj.data&&typeof obj.data==="object")return obj.data;
+  if(obj&&obj.settings&&obj.teams)return obj;
+  throw new Error("Format data tidak dikenali.");
+}
+function importData(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const imported=extractImportedData(JSON.parse(reader.result));
+      if(!imported.settings||!Array.isArray(imported.teams))throw new Error("Data turnamen tidak lengkap.");
+      const ok=confirm("Import akan menimpa data turnamen yang sedang tersimpan. Data sekarang akan diamankan otomatis sebagai backup sebelum ditimpa. Lanjutkan?");
+      if(!ok){input.value="";return;}
+      // Safety backup of the current data before overwrite.
+      localStorage.setItem(BACKUP_STORAGE,JSON.stringify(state));
+      localStorage.setItem(STORAGE,JSON.stringify(imported));
+      alert("Import berhasil. Halaman akan dimuat ulang otomatis.");
+      location.reload();
+    }catch(err){alert("Import gagal: "+(err?.message||"file tidak valid."));input.value="";}
+  };
+  reader.readAsText(file);
+}
+function restoreData(){
+  const raw=localStorage.getItem(BACKUP_STORAGE);
+  if(!raw){alert("Belum ada backup lokal untuk dipulihkan.");return;}
+  const ok=confirm("Restore akan menimpa data turnamen saat ini dengan backup lokal. Data saat ini akan diamankan terlebih dahulu sebagai backup baru. Lanjutkan?");
+  if(!ok)return;
+  try{
+    const current=JSON.stringify(state);
+    const backup=JSON.parse(raw);
+    localStorage.setItem(BACKUP_STORAGE,current);
+    localStorage.setItem(STORAGE,JSON.stringify(backup));
+    alert("Restore berhasil. Halaman akan dimuat ulang otomatis.");
+    location.reload();
+  }catch(err){alert("Restore gagal: "+(err?.message||"backup tidak valid."));}
+}
 
 function exportCSV(){
   const rows=[["Rank","Tim","Grup","Game","Booyah","Kill","Placement Point","Total Point"],...calcStandings().map((x,i)=>[i+1,x.team.name,groupOf(x.team.id),x.games,x.booyah,x.kills,x.placement,x.total])];

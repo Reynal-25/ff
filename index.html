@@ -56,6 +56,18 @@
   <div class="section-title">
     <div><h2>Editor Turnamen</h2><p class="muted">Atur nama/logo turnamen, jumlah game per hari, dan format Play-In.</p></div>
     <div class="button-row"><button onclick="saveTournamentSettings()">💾 Simpan Pengaturan</button><button class="danger-btn" onclick="resetAllResults()">🗑️ Reset Semua Hasil</button></div>
+  <div class="card data-manager-card">
+    <h3>Manajemen Data</h3>
+    <p class="muted">Export, import, backup, dan restore data turnamen tanpa menghapus data yang sekarang kecuali kamu mengonfirmasi penimpaan.</p>
+    <div class="data-actions">
+      <button class="data-btn export-btn" onclick="exportData()"><span class="svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"/></svg></span>Export Data</button>
+      <button class="data-btn import-btn" onclick="document.getElementById('importDataFile').click()"><span class="svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0L7 8m5-5 5 5M5 21h14"/></svg></span>Import Data</button>
+      <button class="data-btn backup-btn" onclick="backupData()"><span class="svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 4v5h8V4M8 20v-7h8v7"/></svg></span>Backup Data</button>
+      <button class="data-btn restore-btn" onclick="restoreData()"><span class="svg-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 8.5 6M12 3v5h5M20.5 9A9 9 0 0 0 12 3"/></svg></span>Restore Data</button>
+      <input id="importDataFile" type="file" accept="application/json,.json" hidden onchange="importData(this)">
+    </div>
+    <div id="backupInfo" class="small-note"></div>
+  </div>
   </div>
   <div class="editor-grid">
     <div class="card">
