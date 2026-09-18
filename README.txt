@@ -15,3 +15,8 @@ Perubahan utama:
 Cara menjalankan:
 1. Extract ZIP.
 2. Buka index.html di browser atau gunakan Live Server di VS Code.
+
+Versi terbaru: V23
+- Pilihan bendera tim dan pemain sekarang menggunakan dropdown seluruh negara/territory (249 entri ISO) dengan nama negara + emoji bendera.
+- Default tetap Indonesia.
+- Data localStorage dan fitur Export/Import/Backup/Restore tetap menggunakan storage yang sama sehingga data turnamen yang ada dipertahankan.
