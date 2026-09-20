@@ -374,7 +374,7 @@ function countrySelect(value,onchange,title="Pilih negara"){
 
 function renderAll(){
   renderIdentity();renderSettings();renderTeams();renderGroups();renderSchedule();renderMatchSelect();renderMatchInput();
-  renderScoring();renderStandings();renderTop5();renderAllMatchdayStandings();renderHistory();renderPlayIn();renderGrandFinal();renderPlayerStats();renderBackupInfo();routePage();
+  renderScoring();renderStandings();renderChampionshipHome();renderTop5();renderAllMatchdayStandings();renderHistory();renderPlayIn();renderGrandFinal();renderPlayerStats();renderBackupInfo();routePage();
 }
 function renderIdentity(){
   const n=state.settings.name||"FF CHAMPIONSHIP";
@@ -747,6 +747,33 @@ function renderStandings(){
   el.innerHTML=`<span>🏆 ${direct} langsung Grand Final</span><span>🎟️ ${pi} tim Play-In</span><span>❌ ${elim} tereliminasi</span><span>📌 ${source}</span>`;
   showStandingsMode(state.settings.regular.groupMode==="one"?"A":"overall");
 }
+function championshipHomeRows(){
+  const gf=grandFinalRows();
+  const gfDone=Array.isArray(state.grandFinalResults?.games) && state.grandFinalResults.games.length>0 && state.grandFinalResults.games.every(g=>g.saved);
+  if(gfDone && gf.length) return {stage:"Grand Final",rows:gf.map(x=>({team:x.team,total:x.total}))};
+  const regular=state.settings.regular.groupMode==="one" ? groupQualificationOrder() : calcStandings();
+  return {stage:"Regular Season",rows:regular.map(x=>({team:x.team,total:x.total}))};
+}
+function championshipDestination(teamId){
+  const gfDone=Array.isArray(state.grandFinalResults?.games) && state.grandFinalResults.games.length>0 && state.grandFinalResults.games.every(g=>g.saved);
+  if(gfDone) return "Champion";
+  const q=regularQualification();
+  if(q.directTeams?.some(x=>x.team.id===teamId)) return "Grand Final";
+  if(q.playin?.some(x=>x.team.id===teamId)) return "Play-In";
+  return "-";
+}
+function championshipStatus(teamId,stage){
+  if(stage==="Grand Final") return "🏆 Finalist";
+  return qualificationStatus(teamId);
+}
+function renderChampionshipHome(){
+  const body=document.getElementById('championshipBody'),badge=document.getElementById('championshipStage');
+  if(!body||!badge)return;
+  const {stage,rows}=championshipHomeRows();
+  badge.textContent=stage;
+  body.innerHTML=rows.length?rows.map((x,i)=>`<tr class="champ-row ${i<3?'champ-top':''}"><td><span class="place-badge">${i+1}</span></td><td><div class="champ-participant"><img src="${logoSrc(x.team)}"><span>${escapeHtml(x.team.name)}</span></div></td><td><b>${x.total}</b></td><td>${escapeHtml(championshipDestination(x.team.id))}</td><td>${championshipStatus(x.team.id,stage)}</td></tr>`).join(''):`<tr><td colspan="5" class="champ-empty">Belum ada hasil kejuaraan.</td></tr>`;
+}
+
 function renderTop5(){
   document.getElementById("top5").innerHTML=calcStandings().slice(0,5).map((x,i)=>`<div class="card top-card"><b>#${i+1}</b><img class="logo" src="${logoSrc(x.team)}"><div><b>${escapeHtml(x.team.name)}</b><small class="muted"> • ${x.games} game</small></div><span class="points">${x.total}</span></div>`).join("");
 }
@@ -928,6 +955,7 @@ function routePage(){
   document.querySelectorAll('main > section.page').forEach(el=>el.style.display='none');
   if(route==='dashboard'){
     document.getElementById('dashboard')?.style.setProperty('display','block');
+    document.getElementById('dashboardChampionship')?.style.setProperty('display','block');
     document.getElementById('dashboardTop5')?.style.setProperty('display','block');
   }else{
     document.getElementById(route)?.style.setProperty('display','block');
